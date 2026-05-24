@@ -68,52 +68,62 @@ public partial class DayNightCycle : Node
     {
         if (_sun == null) return;
 
-        if (Daylight > 0.05f)
-        {
-            float pitchDeg = -10f - Daylight * 70f;
-            var basis = Basis.FromEuler(new Vector3(Mathf.DegToRad(pitchDeg), Mathf.DegToRad(35), 0));
-            _sun.Transform = new Transform3D(basis, _sun.Position);
+        // Smooth blend between night-moon config and day-sun config.
+        // No hard threshold → no visible jerk at sunrise/sunset.
+        float blend = Mathf.SmoothStep(0f, 0.3f, Daylight);
 
-            _sun.LightEnergy = Daylight * 1.3f + 0.15f;
-            float warmth = 1f - Daylight;
-            _sun.LightColor = new Color(
-                1f,
-                0.95f - warmth * 0.3f,
-                0.85f - warmth * 0.5f);
-        }
-        else
-        {
-            var moonBasis = Basis.FromEuler(new Vector3(Mathf.DegToRad(-60), Mathf.DegToRad(35), 0));
-            _sun.Transform = new Transform3D(moonBasis, _sun.Position);
-            _sun.LightEnergy = 0.35f;
-            _sun.LightColor = new Color(0.6f, 0.75f, 1f);
-        }
+        // Pitch: moon at -60°, sun goes from -10° (horizon) to -80° (overhead)
+        float nightPitch = -60f;
+        float dayPitch = -10f - Daylight * 70f;
+        float pitchDeg = Mathf.Lerp(nightPitch, dayPitch, blend);
+
+        var basis = Basis.FromEuler(new Vector3(Mathf.DegToRad(pitchDeg), Mathf.DegToRad(35), 0));
+        _sun.Transform = new Transform3D(basis, _sun.Position);
+
+        // Energy: 0.35 (moon) → up to 1.45 (full noon sun)
+        float nightEnergy = 0.35f;
+        float dayEnergy = Daylight * 1.3f + 0.15f;
+        _sun.LightEnergy = Mathf.Lerp(nightEnergy, dayEnergy, blend);
+
+        // Color: moon-blue → sun-warm
+        Color moonColor = new(0.6f, 0.75f, 1f);
+        float warmth = 1f - Daylight;
+        Color dayColor = new(
+            1f,
+            0.95f - warmth * 0.3f,
+            0.85f - warmth * 0.5f);
+        _sun.LightColor = moonColor.Lerp(dayColor, blend);
     }
 
     private void UpdateSky()
     {
         if (_env?.Environment?.Sky?.SkyMaterial is not ProceduralSkyMaterial sky) return;
 
+        // 3-stop continuous gradient: night → dusk/dawn → day
+        // Blended smoothly with Daylight (no hard thresholds → no flicker)
+        Color nightTop = new(0.04f, 0.04f, 0.12f);
+        Color nightHorizon = new(0.12f, 0.08f, 0.18f);
+        Color duskTop = new(0.22f, 0.16f, 0.32f);
+        Color duskHorizon = new(0.90f, 0.50f, 0.28f);
+        Color dayTop = new(0.30f, 0.60f, 0.90f);
+        Color dayHorizon = new(0.72f, 0.85f, 0.95f);
+
         Color topTarget, horizonTarget;
-        if (Daylight > 0.7f)
+        if (Daylight < 0.5f)
         {
-            topTarget = new Color(0.30f, 0.60f, 0.90f);
-            horizonTarget = new Color(0.72f, 0.85f, 0.95f);
-        }
-        else if (Daylight > 0.1f)
-        {
-            float blend = (Daylight - 0.1f) / 0.6f;
-            topTarget = new Color(0.20f, 0.15f, 0.30f).Lerp(new Color(0.30f, 0.60f, 0.90f), blend);
-            horizonTarget = new Color(0.90f, 0.45f, 0.25f).Lerp(new Color(0.72f, 0.85f, 0.95f), blend);
+            float t = Mathf.SmoothStep(0f, 1f, Daylight * 2f);
+            topTarget = nightTop.Lerp(duskTop, t);
+            horizonTarget = nightHorizon.Lerp(duskHorizon, t);
         }
         else
         {
-            topTarget = new Color(0.04f, 0.04f, 0.12f);
-            horizonTarget = new Color(0.12f, 0.08f, 0.18f);
+            float t = Mathf.SmoothStep(0f, 1f, (Daylight - 0.5f) * 2f);
+            topTarget = duskTop.Lerp(dayTop, t);
+            horizonTarget = duskHorizon.Lerp(dayHorizon, t);
         }
 
-        sky.SkyTopColor = sky.SkyTopColor.Lerp(topTarget, 0.05f);
-        sky.SkyHorizonColor = sky.SkyHorizonColor.Lerp(horizonTarget, 0.05f);
+        sky.SkyTopColor = sky.SkyTopColor.Lerp(topTarget, 0.1f);
+        sky.SkyHorizonColor = sky.SkyHorizonColor.Lerp(horizonTarget, 0.1f);
     }
 
     private void UpdateLamps()
