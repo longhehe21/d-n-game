@@ -1,8 +1,9 @@
-[gd_scene load_steps=22 format=3 uid="uid://bk2m2world3d"]
+[gd_scene load_steps=23 format=3 uid="uid://bk2m2world3d"]
 
 [ext_resource type="Script" path="res://scripts/World.cs" id="1_world"]
 [ext_resource type="Script" path="res://scripts/Player.cs" id="2_player"]
 [ext_resource type="Script" path="res://scripts/VirtualJoystick.cs" id="3_joystick"]
+[ext_resource type="Script" path="res://scripts/DayNightCycle.cs" id="4_daynight"]
 
 [sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
 sky_top_color = Color(0.04, 0.04, 0.12, 1)
@@ -167,7 +168,7 @@ material_override = SubResource("BldgMat4")
 [node name="Coll" type="CollisionShape3D" parent="Building4"]
 shape = SubResource("BuildingShape")
 
-[node name="Lamp1" type="OmniLight3D" parent="."]
+[node name="Lamp1" type="OmniLight3D" parent="." groups=["lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 2.5, 0)
 light_color = Color(1, 0.85, 0.45, 1)
 light_energy = 2.5
@@ -177,7 +178,7 @@ omni_range = 9.0
 mesh = SubResource("LampBulbMesh")
 material_override = SubResource("LampMat")
 
-[node name="Lamp2" type="OmniLight3D" parent="."]
+[node name="Lamp2" type="OmniLight3D" parent="." groups=["lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 2.5, 0)
 light_color = Color(1, 0.85, 0.45, 1)
 light_energy = 2.5
@@ -187,7 +188,7 @@ omni_range = 9.0
 mesh = SubResource("LampBulbMesh")
 material_override = SubResource("LampMat")
 
-[node name="Lamp3" type="OmniLight3D" parent="."]
+[node name="Lamp3" type="OmniLight3D" parent="." groups=["lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 3.5)
 light_color = Color(1, 0.85, 0.45, 1)
 light_energy = 2.5
@@ -197,7 +198,7 @@ omni_range = 9.0
 mesh = SubResource("LampBulbMesh")
 material_override = SubResource("LampMat")
 
-[node name="Lamp4" type="OmniLight3D" parent="."]
+[node name="Lamp4" type="OmniLight3D" parent="." groups=["lamps"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -3.5)
 light_color = Color(1, 0.85, 0.45, 1)
 light_energy = 2.5
@@ -206,6 +207,14 @@ omni_range = 9.0
 [node name="Bulb" type="MeshInstance3D" parent="Lamp4"]
 mesh = SubResource("LampBulbMesh")
 material_override = SubResource("LampMat")
+
+[node name="DayNightCycle" type="Node" parent="."]
+script = ExtResource("4_daynight")
+DayLengthSeconds = 180.0
+StartTime = 0.85
+SunPath = NodePath("../MoonLight")
+EnvPath = NodePath("../WorldEnvironment")
+TimeLabelPath = NodePath("../UI/TimeLabel")
 
 [node name="Player" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
@@ -249,10 +258,20 @@ offset_left = 400.0
 offset_top = 78.0
 offset_right = 1520.0
 offset_bottom = 115.0
-text = "M2 — Đạp được xe (3D, landscape 20:9)"
+text = "M2 — Đạp xe + Day/Night + Fullscreen (Esc thoát, F11 toggle)"
 horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
 theme_override_font_sizes/font_size = 20
+
+[node name="TimeLabel" type="Label" parent="UI"]
+offset_left = 1640.0
+offset_top = 30.0
+offset_right = 1900.0
+offset_bottom = 90.0
+text = "🌙 Đêm  20:24"
+horizontal_alignment = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.7, 1)
+theme_override_font_sizes/font_size = 32
 
 [node name="Joystick" type="Control" parent="UI"]
 offset_left = 80.0

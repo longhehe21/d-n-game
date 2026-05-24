@@ -41,6 +41,25 @@ public partial class World : Node3D
             _statusLabel.Text = "🌙 Đêm Hà Nội — kéo joystick để đi";
     }
 
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventKey key && key.Pressed && !key.Echo)
+        {
+            if (key.Keycode == Key.Escape)
+            {
+                GetTree().Quit();
+            }
+            else if (key.Keycode == Key.F11)
+            {
+                var mode = DisplayServer.WindowGetMode();
+                DisplayServer.WindowSetMode(
+                    mode == DisplayServer.WindowMode.Fullscreen
+                        ? DisplayServer.WindowMode.Windowed
+                        : DisplayServer.WindowMode.Fullscreen);
+            }
+        }
+    }
+
     private void OnRaoButtonPressed()
     {
         if (_isPlaying)
