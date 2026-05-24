@@ -2,7 +2,7 @@ using Godot;
 
 namespace BanhKhucGame;
 
-public partial class World : Node2D
+public partial class World : Node3D
 {
     private Button _raoButton = null!;
     private Label _statusLabel = null!;
@@ -34,10 +34,10 @@ public partial class World : Node2D
 
     public override void _Process(double delta)
     {
-        var speed = _player.Velocity.Length();
-        if (speed > 10f && !_isPlaying)
+        var hSpeed = new Vector2(_player.Velocity.X, _player.Velocity.Z).Length();
+        if (hSpeed > 0.5f && !_isPlaying)
             _statusLabel.Text = "🚴 Đang đạp xe...";
-        else if (speed <= 10f && !_isPlaying)
+        else if (hSpeed <= 0.5f && !_isPlaying)
             _statusLabel.Text = "🌙 Đêm Hà Nội — kéo joystick để đi";
     }
 
