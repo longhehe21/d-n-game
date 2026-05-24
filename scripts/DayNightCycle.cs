@@ -6,7 +6,7 @@ namespace BanhKhucGame;
 public partial class DayNightCycle : Node
 {
     [Export] public float DayLengthSeconds { get; set; } = 180f;
-    [Export(PropertyHint.Range, "0,1,0.01")] public float StartTime { get; set; } = 0.85f;
+    [Export(PropertyHint.Range, "0,1,0.01")] public float StartTime { get; set; } = 0.25f;
     [Export] public NodePath SunPath { get; set; } = "";
     [Export] public NodePath EnvPath { get; set; } = "";
     [Export] public NodePath TimeLabelPath { get; set; } = "";
@@ -129,8 +129,9 @@ public partial class DayNightCycle : Node
         int min = (int)((hourFloat - hour) * 60f);
 
         string phase;
-        if (Daylight > 0.7f) phase = "☀️ Trưa";
-        else if (Daylight > 0.1f) phase = TimeOfDay < 0.5f ? "🌅 Sáng" : "🌇 Chiều";
+        if (hour >= 5 && hour < 11) phase = "🌅 Sáng";
+        else if (hour >= 11 && hour < 14) phase = "☀️ Trưa";
+        else if (hour >= 14 && hour < 18) phase = "🌇 Chiều";
         else phase = "🌙 Đêm";
 
         _label.Text = $"{phase}  {hour:D2}:{min:D2}";

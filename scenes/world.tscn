@@ -211,7 +211,7 @@ material_override = SubResource("LampMat")
 [node name="DayNightCycle" type="Node" parent="."]
 script = ExtResource("4_daynight")
 DayLengthSeconds = 180.0
-StartTime = 0.85
+StartTime = 0.25
 SunPath = NodePath("../MoonLight")
 EnvPath = NodePath("../WorldEnvironment")
 TimeLabelPath = NodePath("../UI/TimeLabel")
@@ -268,7 +268,7 @@ offset_left = 1640.0
 offset_top = 30.0
 offset_right = 1900.0
 offset_bottom = 90.0
-text = "🌙 Đêm  20:24"
+text = "🌅 Sáng  06:00"
 horizontal_alignment = 2
 theme_override_colors/font_color = Color(1, 0.95, 0.7, 1)
 theme_override_font_sizes/font_size = 32
