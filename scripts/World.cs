@@ -70,13 +70,26 @@ public partial class World : Node3D
         else
         {
             _raoPlayer.Play();
+            _player.EmitRaoWave();
             _raoButton.Text = "🔇  Tắt Loa";
             _statusLabel.Text = "🔊 \"Xôi lạc bánh khúc đây!\"";
             _isPlaying = true;
         }
     }
 
-    private void OnRaoFinished() => SetIdleState();
+    private void OnRaoFinished()
+    {
+        if (_isPlaying)
+        {
+            // Loop rao while button is on: replay audio + emit new wave
+            _raoPlayer.Play();
+            _player.EmitRaoWave();
+        }
+        else
+        {
+            SetIdleState();
+        }
+    }
 
     private void SetIdleState()
     {

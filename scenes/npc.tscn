@@ -1,0 +1,54 @@
+[gd_scene load_steps=7 format=3 uid="uid://bk3m3npc"]
+
+[ext_resource type="Script" path="res://scripts/NPC.cs" id="1_npc"]
+
+[sub_resource type="CapsuleShape3D" id="NPCShape"]
+height = 1.4
+radius = 0.3
+
+[sub_resource type="CapsuleMesh" id="NPCBodyMesh"]
+height = 1.0
+radius = 0.25
+
+[sub_resource type="StandardMaterial3D" id="NPCBodyMat"]
+albedo_color = Color(0.6, 0.3, 0.4, 1)
+roughness = 0.7
+
+[sub_resource type="BoxMesh" id="NPCHeadMesh"]
+size = Vector3(0.32, 0.32, 0.32)
+
+[sub_resource type="StandardMaterial3D" id="NPCHeadMat"]
+albedo_color = Color(0.95, 0.78, 0.55, 1)
+roughness = 0.7
+
+[node name="NPC" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_npc")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("NPCShape")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, 0)
+mesh = SubResource("NPCBodyMesh")
+material_override = SubResource("NPCBodyMat")
+
+[node name="Head" type="MeshInstance3D" parent="Visual"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("NPCHeadMesh")
+material_override = SubResource("NPCHeadMat")
+
+[node name="Indicator" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+visible = false
+billboard = 1
+fixed_size = true
+pixel_size = 0.015
+outline_size = 16
+modulate = Color(1, 1, 0.5, 1)
+outline_modulate = Color(0, 0, 0, 0.85)
+text = "?"
+font_size = 96

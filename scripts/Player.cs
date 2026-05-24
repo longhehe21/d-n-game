@@ -8,6 +8,7 @@ public partial class Player : CharacterBody3D
     [Export] public float Acceleration { get; set; } = 30f;
     [Export] public float Friction { get; set; } = 40f;
     [Export] public float Gravity { get; set; } = 20f;
+    [Export] public float RaoWaveRadius { get; set; } = 12f;
     [Export] public NodePath JoystickPath { get; set; } = "";
 
     private VirtualJoystick? _joystick;
@@ -83,5 +84,52 @@ public partial class Player : CharacterBody3D
             var newY = Mathf.Lerp(_visual.Position.Y, _baseVisualY, delta * 10f);
             _visual.Position = new Vector3(_visual.Position.X, newY, _visual.Position.Z);
         }
+    }
+
+    public void EmitRaoWave()
+    {
+        // Roll attention for each NPC in range
+        foreach (var node in GetTree().GetNodesInGroup("npcs"))
+        {
+            if (node is NPC npc && npc.GlobalPosition.DistanceTo(GlobalPosition) < RaoWaveRadius)
+                npc.OnRaoHeard();
+        }
+
+        SpawnWaveVisual();
+    }
+
+    private void SpawnWaveVisual()
+    {
+        var ring = new MeshInstance3D
+        {
+            Mesh = new TorusMesh
+            {
+                InnerRadius = 0.92f,
+                OuterRadius = 1.0f,
+                RingSegments = 48
+            }
+        };
+
+        var mat = new StandardMaterial3D
+        {
+            AlbedoColor = new Color(1f, 0.85f, 0.4f, 0.85f),
+            EmissionEnabled = true,
+            Emission = new Color(1f, 0.85f, 0.4f),
+            EmissionEnergyMultiplier = 2f,
+            Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+        };
+        ring.MaterialOverride = mat;
+
+        GetParent().AddChild(ring);
+        ring.GlobalPosition = new Vector3(GlobalPosition.X, 0.15f, GlobalPosition.Z);
+
+        var tween = CreateTween();
+        tween.SetParallel(true);
+        tween.TweenProperty(ring, "scale", new Vector3(RaoWaveRadius, 1f, RaoWaveRadius), 0.9f)
+             .SetTrans(Tween.TransitionType.Cubic)
+             .SetEase(Tween.EaseType.Out);
+        tween.TweenProperty(mat, "albedo_color", new Color(1f, 0.85f, 0.4f, 0f), 0.9f);
+        tween.Chain().TweenCallback(Callable.From(() => ring.QueueFree()));
     }
 }
