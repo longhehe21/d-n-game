@@ -47,11 +47,21 @@ public partial class DayNightCycle : Node
 
     private void UpdateDaylight()
     {
-        // Daylight curve: 0 at dawn/dusk borders, 1 at noon, 0 at night
-        if (TimeOfDay >= 0.25f && TimeOfDay <= 0.75f)
-            Daylight = Mathf.Sin((TimeOfDay - 0.25f) * 2f * Mathf.Pi);
-        else
+        // Realistic light curve:
+        //   5h-7h30: dawn ramp 0 → 1
+        //   7h30-17h30: full daylight plateau
+        //   17h30-20h: dusk ramp 1 → 0
+        //   20h-5h: night
+        float hour = TimeOfDay * 24f;
+
+        if (hour < 5f || hour >= 20f)
             Daylight = 0f;
+        else if (hour < 7.5f)
+            Daylight = (hour - 5f) / 2.5f;
+        else if (hour < 17.5f)
+            Daylight = 1f;
+        else
+            Daylight = 1f - (hour - 17.5f) / 2.5f;
     }
 
     private void UpdateSun()
